@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Load Pipeline') {
+            steps {
+                script {
+                    // Clear workspace to avoid leftover files
+                    deleteDir() 
+            
+                    // Clone the repository
+                    git branch: 'main', url: 'https://github.com/marahateeq/pipeline-build.git'
+            
+                    // Show current workspace directory
+                    echo "Current workspace directory:"
+                    sh 'pwd'
+            
+                    // List files in the workspace
+                    echo "Workspace content after checkout:"
+                    sh 'ls -l'
+            
+                    // Check for Jenkinsfile.python specifically
+                    sh 'ls -l Jenkinsfile.python || echo "Jenkinsfile.python not found"'
+
+                    def pipelineScript = load 'Jenkinsfile.python'
+                    pipelineScript.executePipeline()
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed.'
+        }
+    }
+}
